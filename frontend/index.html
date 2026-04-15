@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Brief — Smart Meeting Prep</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="app-wrapper">
+
+  <!-- ── Header ────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">
+        <h1>AI Brief</h1>
+        <span>Smart Meeting Prep</span>
+      </div>
+    </div>
+    <span class="header-badge">DEMO · ACME CORP</span>
+  </header>
+
+  <!-- ── Pipeline Stages ───────────────────────────────── -->
+  <section class="pipeline" aria-label="Flujo de trabajo">
+
+    <div class="stage-card done">
+      <div class="stage-number">✓</div>
+      <div class="stage-label">Etapa 1</div>
+      <div class="stage-title">Input</div>
+      <div class="stage-desc">Datos de la reunión recibidos</div>
+    </div>
+
+    <div class="stage-card done">
+      <div class="stage-number">✓</div>
+      <div class="stage-label">Etapa 2</div>
+      <div class="stage-title">Alerta</div>
+      <div class="stage-desc">Riesgo de churn detectado</div>
+    </div>
+
+    <div class="stage-card active">
+      <div class="stage-number">3</div>
+      <div class="stage-label">Etapa 3</div>
+      <div class="stage-title">Análisis</div>
+      <div class="stage-desc">Brief generado por IA</div>
+    </div>
+
+    <div class="stage-card">
+      <div class="stage-number">4</div>
+      <div class="stage-label">Etapa 4</div>
+      <div class="stage-title">Entrega</div>
+      <div class="stage-desc">Listo para la reunión</div>
+    </div>
+
+  </section>
+
+  <!-- ── Main Grid ──────────────────────────────────────── -->
+  <div class="main-grid">
+
+    <!-- Input Panel -->
+    <aside class="input-panel">
+
+      <!-- Form Card -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">📋</span>
+          <div>
+            <div class="card-title">Nueva Reunión</div>
+            <div class="card-subtitle">Genera el brief en segundos</div>
+          </div>
+        </div>
+
+        <form id="meeting-form">
+          <div class="form-group">
+            <label for="company">Empresa</label>
+            <input type="text" id="company" placeholder="Ej: ACME Corp" value="ACME Corp" required />
+          </div>
+
+          <div class="form-group">
+            <label for="participants">Participantes</label>
+            <textarea
+              id="participants"
+              placeholder="Un nombre por línea&#10;Ej: Laura Gómez&#10;Mario Ruiz"
+            >Laura Gómez
+Mario Ruiz
+Ana Torres</textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="meeting-date">Fecha y hora</label>
+            <input type="datetime-local" id="meeting-date" value="2026-04-16T10:00" required />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Tu correo <span style="color:var(--text-dim);font-weight:400;">(recibe el brief 24h antes)</span></label>
+            <input type="email" id="email" placeholder="tu@correo.com" />
+          </div>
+
+          <button type="submit" class="btn-primary" id="submit-btn">
+            <div class="spinner" id="spinner"></div>
+            <span class="btn-text">⚡ Generar Brief</span>
+          </button>
+        </form>
+
+        <!-- Email confirmation notice -->
+        <div id="email-notice" style="display:none;margin-top:12px;padding:12px;
+             background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.3);
+             border-radius:8px;font-size:13px;color:#86efac;">
+          <span style="font-size:15px;">✉</span>
+          <span id="email-notice-text"></span>
+        </div>
+      </div>
+
+      <!-- Alert Card (populated by JS) -->
+      <div class="card alert-card" id="alert-card" style="display:none">
+        <div class="card-header">
+          <span class="card-icon">⚠️</span>
+          <div>
+            <div class="card-title">Alerta Detectada</div>
+          </div>
+        </div>
+        <div class="alert-badge">
+          <span>●</span> <span id="alert-level-text">RIESGO</span>
+        </div>
+        <div class="alert-message" id="alert-message"></div>
+        <div class="score-row">
+          <span class="score-label">Health Score</span>
+          <div class="score-bar-wrap">
+            <div class="score-bar" id="score-bar" style="width:0%"></div>
+          </div>
+          <span class="score-value" id="score-value">—</span>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- Output Panel -->
+    <main class="output-panel" id="output-panel">
+
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">📄</div>
+        <p>Ingresa los datos de la reunión y<br/>presiona <strong>Generar Brief</strong> para comenzar.</p>
+      </div>
+
+      <!-- Meeting meta -->
+      <div id="meeting-meta-card" class="card" style="display:none">
+        <div class="card-header">
+          <span class="card-icon">🏢</span>
+          <div>
+            <div class="card-title" id="meta-company-title"></div>
+            <div class="card-subtitle">Resumen ejecutivo de la reunión</div>
+          </div>
+        </div>
+        <div class="meeting-meta" id="meeting-meta-chips"></div>
+      </div>
+
+      <!-- Executive Summary -->
+      <div class="card" id="card-summary" style="display:none">
+        <div class="section-label">Resumen Ejecutivo</div>
+        <p class="summary-text" id="summary-text"></p>
+      </div>
+
+      <!-- Client Context -->
+      <div class="card" id="card-context" style="display:none">
+        <div class="section-label">Contexto del Cliente</div>
+        <div class="context-grid" id="context-grid"></div>
+        <div class="section-label" style="margin-top:16px">Contactos Clave</div>
+        <div class="contacts-list" id="contacts-list"></div>
+      </div>
+
+      <!-- Value Hypothesis -->
+      <div class="card" id="card-value" style="display:none">
+        <div class="section-label">Hipótesis de Valor</div>
+        <div class="value-list" id="value-list"></div>
+      </div>
+
+      <!-- Key Questions -->
+      <div class="card" id="card-questions" style="display:none">
+        <div class="section-label">Preguntas Clave para la Reunión</div>
+        <div class="questions-list" id="questions-list"></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ── JavaScript ──────────────────────────────────────── -->
+<script>
+  const form = document.getElementById('meeting-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const spinner = document.getElementById('spinner');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await generateBrief();
+  });
+
+  // Auto-load demo on page load
+  window.addEventListener('DOMContentLoaded', () => generateBrief());
+
+  async function generateBrief() {
+    const company = document.getElementById('company').value.trim();
+    const participantsRaw = document.getElementById('participants').value.trim();
+    const meetingDate = document.getElementById('meeting-date').value;
+    const email = document.getElementById('email').value.trim();
+
+    const participants = participantsRaw
+      .split('\n')
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
+
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.classList.add('loading');
+    document.getElementById('email-notice').style.display = 'none';
+
+    try {
+      const body = { company, participants, meeting_datetime: meetingDate };
+      if (email) body.email = email;
+
+      const res = await fetch('/api/meeting/trigger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+      const data = await res.json();
+      renderBrief(data);
+    } catch (err) {
+      console.error(err);
+      alert('No se pudo conectar con el servidor. Asegúrate de que el backend esté corriendo en http://localhost:8000');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('loading');
+    }
+  }
+
+  function renderBrief({ meeting, brief, email_scheduled, email_send_at }) {
+    // ── Email notice ─────────────────────────────────────
+    const notice = document.getElementById('email-notice');
+    if (email_scheduled && email_send_at) {
+      const sendDate = new Date(email_send_at);
+      const formatted = sendDate.toLocaleString('es-PE', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      });
+      document.getElementById('email-notice-text').textContent =
+        ` Brief programado — se enviará el ${formatted}`;
+      notice.style.display = 'flex';
+      notice.style.gap = '8px';
+      notice.style.alignItems = 'center';
+    }
+    // Hide empty state
+    document.getElementById('empty-state').style.display = 'none';
+
+    // ── Alert Card ──────────────────────────────────────
+    const alertCard = document.getElementById('alert-card');
+    const alert = brief.alert;
+    if (alert) {
+      document.getElementById('alert-message').textContent = alert.message;
+      document.getElementById('alert-level-text').textContent =
+        alert.level === 'warning' ? 'RIESGO ALTO' : 'INFORMACIÓN';
+      document.getElementById('score-value').textContent = alert.score;
+      document.getElementById('score-bar').style.width = `${alert.score}%`;
+      alertCard.style.display = 'block';
+    }
+
+    // ── Meeting Meta ─────────────────────────────────────
+    const metaCard = document.getElementById('meeting-meta-card');
+    document.getElementById('meta-company-title').textContent = brief.company || meeting.company;
+    const chipsContainer = document.getElementById('meeting-meta-chips');
+    chipsContainer.innerHTML = '';
+    addChip(chipsContainer, '📅', formatDate(meeting.datetime));
+    addChip(chipsContainer, '👥', meeting.participants.join(', '));
+    metaCard.style.display = 'block';
+
+    // ── Executive Summary ─────────────────────────────────
+    document.getElementById('summary-text').textContent = brief.executive_summary;
+    show('card-summary');
+
+    // ── Client Context ────────────────────────────────────
+    const ctx = brief.client_context;
+    const contextGrid = document.getElementById('context-grid');
+    contextGrid.innerHTML = '';
+    addContextItem(contextGrid, 'Industria', ctx.industry);
+    addContextItem(contextGrid, 'Empleados', ctx.employees);
+    addContextItem(contextGrid, 'ARR', ctx.arr);
+    addContextItem(contextGrid, 'Cliente desde', ctx.since);
+    addContextItem(contextGrid, 'Último contacto', ctx.last_interaction);
+    addContextItem(contextGrid, 'NPS Score', ctx.nps_score || '—',
+      ctx.nps_score < 50 ? '#ef4444' : '#22c55e');
+
+    const contactsList = document.getElementById('contacts-list');
+    contactsList.innerHTML = '';
+    (ctx.key_contacts || []).forEach(c => {
+      const initials = c.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      contactsList.innerHTML += `
+        <div class="contact-row">
+          <div class="contact-avatar">${initials}</div>
+          <div class="contact-info">
+            <div class="contact-name">${c.name}</div>
+            <div class="contact-role">${c.role}</div>
+          </div>
+          <div class="sentiment-dot ${c.sentiment}"></div>
+          <span class="sentiment-label">${c.sentiment}</span>
+        </div>`;
+    });
+    show('card-context');
+
+    // ── Value Hypothesis ──────────────────────────────────
+    const valueList = document.getElementById('value-list');
+    valueList.innerHTML = '';
+    (brief.value_hypothesis || []).forEach((v, i) => {
+      valueList.innerHTML += `
+        <div class="value-item">
+          <span class="value-index">H${i + 1}</span>
+          <span>${v}</span>
+        </div>`;
+    });
+    show('card-value');
+
+    // ── Key Questions ─────────────────────────────────────
+    const questionsList = document.getElementById('questions-list');
+    questionsList.innerHTML = '';
+    (brief.key_questions || []).forEach((q, i) => {
+      questionsList.innerHTML += `
+        <div class="question-item">
+          <span class="question-num">${i + 1}.</span>
+          <span>${q}</span>
+        </div>`;
+    });
+    show('card-questions');
+
+    // Update pipeline stage 4 to active
+    const stages = document.querySelectorAll('.stage-card');
+    if (stages[3]) {
+      stages[3].classList.add('done');
+      stages[3].querySelector('.stage-number').textContent = '✓';
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────
+  function show(id) {
+    document.getElementById(id).style.display = 'block';
+  }
+
+  function addChip(container, icon, text) {
+    container.innerHTML += `
+      <div class="meta-chip">${icon} <strong>${text}</strong></div>`;
+  }
+
+  function addContextItem(container, label, value, color) {
+    container.innerHTML += `
+      <div class="context-item">
+        <div class="ci-label">${label}</div>
+        <div class="ci-value" style="${color ? `color:${color}` : ''}">${value}</div>
+      </div>`;
+  }
+
+  function formatDate(dt) {
+    if (!dt) return '—';
+    const d = new Date(dt);
+    return d.toLocaleString('es-PE', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+  }
+</script>
+
+</body>
+</html>
