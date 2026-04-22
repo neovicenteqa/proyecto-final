@@ -14,6 +14,7 @@ env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"
 load_dotenv(dotenv_path=os.path.normpath(env_path))
 
 from api.routes import router
+from api.calendar_routes import router as calendar_router
 from services.scheduler import scheduler
 
 
@@ -35,6 +36,7 @@ app = FastAPI(
 
 # --- API routes ---
 app.include_router(router, prefix="/api", tags=["Meeting"])
+app.include_router(calendar_router, prefix="/api", tags=["Calendar"])
 
 # --- Serve frontend static files ---
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend")
