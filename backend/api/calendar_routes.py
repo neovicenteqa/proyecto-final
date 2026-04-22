@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, BackgroundTasks, Request, Header
 from typing import Optional
 from datetime import datetime, timedelta, timezone
@@ -7,9 +8,6 @@ from services.scheduler import scheduler
 from services.email_service import send_brief_email
 
 router = APIRouter()
-
-# channel_id → { calendar_id, user_email }
-active_watches: dict = {}
 
 
 # ── Registro del webhook ──────────────────────────────────────────────────────
@@ -35,11 +33,6 @@ async def register_calendar_watch(payload: dict):
         )
 
         channel_id = result["id"]
-        active_watches[channel_id] = {
-            "calendar_id": "primary",
-            "user_email": user_email,
-        }
-
         expiration_ms = int(result.get("expiration", 0))
         expiration_dt = (
             datetime.fromtimestamp(expiration_ms / 1000).isoformat()
@@ -72,18 +65,20 @@ async def calendar_webhook(
     Debe responder 200 inmediatamente; el procesamiento va en background.
     """
     if x_goog_resource_state == "sync":
+        print(f"[calendar] Sync recibido para canal {x_goog_channel_id}")
         return {"status": "ok"}
 
-    if x_goog_resource_state == "exists" and x_goog_channel_id:
-        watch_info = active_watches.get(x_goog_channel_id)
-        if watch_info:
+    if x_goog_resource_state == "exists":
+        user_email = os.getenv("CALENDAR_USER_EMAIL", "")
+        if user_email:
+            print(f"[calendar] Notificación recibida — procesando calendario de {user_email}")
             background_tasks.add_task(
                 _process_calendar_update,
-                watch_info["calendar_id"],
-                watch_info["user_email"],
+                user_email,
+                user_email,
             )
         else:
-            print(f"[calendar] Notificación de canal desconocido: {x_goog_channel_id}")
+            print("[calendar] ERROR: variable CALENDAR_USER_EMAIL no configurada")
 
     return {"status": "ok"}
 
