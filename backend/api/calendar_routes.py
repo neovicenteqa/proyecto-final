@@ -98,6 +98,12 @@ async def _process_calendar_update(calendar_id: str, user_email: str):
         print(f"[calendar] Error procesando update para {user_email}: {exc}")
 
 
+def _get_kam_list() -> set:
+    """Lee la lista de KAMs desde la variable de entorno BRIEF_RECIPIENTS."""
+    raw = os.getenv("BRIEF_RECIPIENTS", "")
+    return {email.strip().lower() for email in raw.split(",") if email.strip()}
+
+
 def _schedule_brief_for_event(event: dict, triggered_by: str):
     summary = event.get("summary", "Reunión")
     start = event.get("start", {})
@@ -108,16 +114,23 @@ def _schedule_brief_for_event(event: dict, triggered_by: str):
     if status == "cancelled" or not start_str:
         return
 
-    # Solo participantes @neo.com.pe (excluye el organizador-bot)
-    neo_emails = [
-        a["email"]
-        for a in attendees
-        if a.get("email", "").endswith("@neo.com.pe")
-        and not a.get("resource", False)
-    ]
+    kam_list = _get_kam_list()
 
-    if not neo_emails:
-        print(f"[calendar] Evento '{summary}' sin participantes @neo — ignorado")
+    # KAMs que están invitados a esta reunión (intersección entre asistentes y lista KAM)
+    attendee_emails = {
+        a["email"].lower()
+        for a in attendees
+        if a.get("email") and not a.get("resource", False)
+    }
+
+    if kam_list:
+        recipients = kam_list & attendee_emails
+    else:
+        # Si no hay lista configurada, enviar a todos los @neo.com.pe del evento
+        recipients = {e for e in attendee_emails if e.endswith("@neo.com.pe")}
+
+    if not recipients:
+        print(f"[calendar] '{summary}' — ningún KAM invitado, no se envía brief")
         return
 
     # Parsear fecha
@@ -128,7 +141,6 @@ def _schedule_brief_for_event(event: dict, triggered_by: str):
         print(f"[calendar] No se pudo parsear fecha: {start_str}")
         return
 
-    # Generar brief usando el título del evento como empresa
     brief = get_mock_brief(summary)
     meeting_data = {
         "company": summary,
@@ -141,7 +153,7 @@ def _schedule_brief_for_event(event: dict, triggered_by: str):
     send_at = start_dt_local - timedelta(hours=24)
     now = datetime.now()
 
-    for email in neo_emails:
+    for email in recipients:
         run_at = send_at if send_at > now else now + timedelta(seconds=10)
 
         scheduler.add_job(
