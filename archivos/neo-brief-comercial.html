@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brief Comercial KAM — Neo Consulting</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --neo-navy: #000033;
+    --neo-blue: #05058c;
+    --neo-mid: #02025b;
+    --neo-lavender: #a5a8d8;
+    --neo-light-lavender: #d0d3ee;
+    --neo-bg: #f5f6fa;
+    --neo-white: #ffffff;
+    --neo-gray: #595959;
+    --neo-light-gray: #eaeaea;
+    --neo-accent: #7ba3f0;
+
+    --red: #e53e3e;
+    --red-bg: #fff5f5;
+    --yellow: #d69e2e;
+    --yellow-bg: #fffff0;
+    --green: #2f855a;
+    --green-bg: #f0fff4;
+
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--neo-bg);
+    color: var(--neo-navy);
+    min-height: 100vh;
+    padding: 32px 24px 60px;
+  }
+
+  /* ── WATERMARK HELPER ── */
+  .tag-virtual {
+    background: #e8f4ff;
+    color: var(--neo-blue);
+    border: 1px solid var(--neo-accent);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .tag-presencial {
+    background: #edfbf2;
+    color: #276749;
+    border: 1px solid #68d391;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── WRAPPER ── */
+  .brief-wrapper {
+    max-width: 880px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ── TOP NAV / LOGO ── */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0 8px;
+    border-bottom: 2px solid var(--neo-lavender);
+    margin-bottom: 4px;
+  }
+  .neo-logo svg { height: 28px; width: auto; }
+  .top-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--neo-gray);
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--neo-white);
+    border-radius: var(--radius);
+    border: 1px solid var(--neo-light-lavender);
+    padding: 22px 26px;
+    position: relative;
+  }
+  .card-accent {
+    border-left: 4px solid var(--neo-blue);
+  }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--neo-blue);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--neo-light-lavender);
+  }
+
+  /* ── BLOCK 1: CABECERA ── */
+  .header-card {
+    background: linear-gradient(135deg, #f0f2fc 0%, #ffffff 60%);
+    border: 1px solid var(--neo-light-lavender);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .empresa-nombre {
+    font-family: 'PT Serif', serif;
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--neo-navy);
+    line-height: 1.15;
+  }
+  .empresa-nombre span {
+    color: var(--neo-blue);
+  }
+  .reunion-badges {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+  .badge-tipo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .reminder-box {
+    background: #fffbeb;
+    border: 1px solid #f6e05e;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 11px;
+    color: #744210;
+    max-width: 260px;
+    margin-top: 6px;
+  }
+  .reminder-box strong {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #92400e;
+    margin-bottom: 6px;
+  }
+  .reminder-box ul {
+    list-style: none;
+    padding: 0;
+  }
+  .reminder-box ul li::before {
+    content: '→ ';
+    font-weight: 700;
+    color: #d97706;
+  }
+  .reminder-box ul li {
+    margin-bottom: 3px;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    border-top: 1px solid var(--neo-light-lavender);
+    padding-top: 16px;
+  }
+  .meta-item label {
+    display: block;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--neo-gray);
+    margin-bottom: 4px;
+  }
+  .meta-item .meta-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--neo-navy);
+  }
+  .meta-item .meta-value.small {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+  .asistente-chip {
+    display: inline-block;
+    background: #eef0fc;
+    border: 1px solid var(--neo-light-lavender);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--neo-blue);
+    margin: 2px 3px 2px 0;
+  }
+  .asistente-chip span {
+    font-weight: 400;
+    color: var(--neo-gray);
+    font-size: 10px;
+  }
+
+  /* ── BLOQUE RESUMEN ── */
+  .resumen-text {
+    font-family: 'PT Serif', serif;
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--neo-navy);
+    border-left: 3px solid var(--neo-lavender);
+    padding-left: 14px;
+    max-width: 700px;
+  }
+
+  /* ── GRID 2 COL ── */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  /* ── KPI PILL ── */
+  .kpi-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 7px;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .kpi-row:last-child { margin-bottom: 0; }
+  .kpi-label { color: var(--neo-navy); }
+  .kpi-val {
+    font-size: 14px;
+    font-weight: 900;
+    border-radius: 20px;
+    padding: 2px 12px;
+  }
+
+  .status-red    { background: var(--red-bg);    border: 1px solid #feb2b2; }
+  .status-yellow { background: var(--yellow-bg); border: 1px solid #fefcbf; }
+  .status-green  { background: var(--green-bg);  border: 1px solid #9ae6b4; }
+
+  .badge-red    { background: #fed7d7; color: var(--red);    }
+  .badge-yellow { background: #fefcbf; color: var(--yellow); }
+  .badge-green  { background: #c6f6d5; color: var(--green);  }
+
+  /* ── CONTEXT DATA ── */
+  .data-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .data-item {
+    background: var(--neo-bg);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    border: 1px solid var(--neo-light-lavender);
+  }
+  .data-item label {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--neo-gray);
+    display: block;
+    margin-bottom: 3px;
+  }
+  .data-item .val {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--neo-navy);
+  }
+  .data-item .val.body {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--neo-navy);
+  }
+
+  /* ── CONTACTOS ── */
+  .contact-card {
+    background: var(--neo-bg);
+    border: 1px solid var(--neo-light-lavender);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .contact-card:last-child { margin-bottom: 0; }
+  .contact-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--neo-blue), var(--neo-lavender));
+    color: white;
+    font-weight: 900;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .contact-info strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--neo-navy);
+  }
+  .contact-info small {
+    font-size: 11px;
+    color: var(--neo-gray);
+  }
+  .contact-tags {
+    margin-top: 4px;
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .ctag {
+    background: #eef0fc;
+    color: var(--neo-blue);
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 8px;
+  }
+  .ctag.decision { background: #e8f4ff; color: #2b6cb0; }
+  .ctag.influencer { background: #fef3c7; color: #92400e; }
+  .ctag.usuario { background: #f0fff4; color: #276749; }
+
+  /* ── PROPUESTAS ── */
+  .propuesta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--neo-bg);
+    border: 1px solid var(--neo-light-lavender);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    margin-bottom: 7px;
+    gap: 10px;
+  }
+  .propuesta-row:last-child { margin-bottom: 0; }
+  .propuesta-name {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--neo-navy);
+    flex: 1;
+  }
+  .propuesta-meta {
+    font-size: 11px;
+    color: var(--neo-gray);
+    flex: 1;
+    text-align: center;
+  }
+  .propuesta-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .badge-activa  { background: #c6f6d5; color: #276749; }
+  .badge-renovar { background: #fefcbf; color: #744210; }
+  .badge-cerrada { background: #e2e8f0; color: #4a5568; }
+
+  /* ── PREGUNTAS CLAVE ── */
+  .pregunta-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--neo-light-lavender);
+  }
+  .pregunta-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .pregunta-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--neo-blue);
+    color: white;
+    font-size: 11px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .pregunta-content strong {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--neo-navy);
+    margin-bottom: 2px;
+  }
+  .pregunta-content p {
+    font-size: 12px;
+    color: var(--neo-gray);
+    line-height: 1.5;
+  }
+  .pregunta-tag {
+    display: inline-block;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 1px 7px;
+    border-radius: 20px;
+    margin-bottom: 4px;
+  }
+  .ptag-contractual { background: #fed7d7; color: #c53030; }
+  .ptag-claridad    { background: #e8f4ff; color: #2b6cb0; }
+  .ptag-estrategia  { background: #f0fff4; color: #276749; }
+  .ptag-relacion    { background: #fef3c7; color: #92400e; }
+
+  /* ── NOTAS LIBRES ── */
+  .notes-area {
+    min-height: 72px;
+    background: var(--neo-bg);
+    border: 1.5px dashed var(--neo-light-lavender);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 12px;
+    color: #aaa;
+    font-style: italic;
+  }
+
+  /* ── FOOTER ── */
+  .brief-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--neo-light-lavender);
+    font-size: 10.5px;
+    color: var(--neo-gray);
+  }
+  .brief-footer .neo-small {
+    font-weight: 700;
+    color: var(--neo-blue);
+    letter-spacing: .08em;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    body { background: white; padding: 16px; }
+    .card, .header-card { break-inside: avoid; }
+  }
+  @media (max-width: 640px) {
+    .grid-2, .meta-grid, .grid-3 { grid-template-columns: 1fr; }
+    .header-top { flex-direction: column; }
+    .reunion-badges { align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="brief-wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <!-- NEO LOGO (SVG inline) -->
+    <div class="neo-logo">
+      <svg viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- N -->
+        <rect x="2" y="4" width="28" height="28" stroke="#000033" stroke-width="2.5" fill="none"/>
+        <line x1="2" y1="32" x2="30" y2="4" stroke="#000033" stroke-width="2.5"/>
+        <!-- E (circle with horizontal line) -->
+        <circle cx="60" cy="18" r="13" stroke="#000033" stroke-width="2.5" fill="none"/>
+        <line x1="47" y1="18" x2="73" y2="18" stroke="#000033" stroke-width="2.5"/>
+        <!-- O -->
+        <circle cx="98" cy="18" r="13" stroke="#000033" stroke-width="2.5" fill="none"/>
+      </svg>
+    </div>
+    <span class="top-label">Brief Comercial KAM · Confidencial</span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       BLOQUE 1 — CABECERA DE LA REUNIÓN
+  ═══════════════════════════════════════════ -->
+  <div class="header-card">
+    <div class="header-top">
+      <div>
+        <div class="empresa-nombre">
+          <span>[Nombre de la Empresa]</span>
+        </div>
+        <div style="margin-top:8px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+          <span style="font-size:12px; color:var(--neo-gray);">📅</span>
+          <span style="font-size:13px; font-weight:600; color:var(--neo-navy);">[Fecha de reunión]</span>
+          <span style="font-size:12px; color:var(--neo-gray); margin:0 4px;">·</span>
+          <span style="font-size:13px; font-weight:600; color:var(--neo-navy);">🕐 [Hora]</span>
+        </div>
+      </div>
+
+      <div class="reunion-badges">
+        <div class="badge-tipo">
+          <span class="tag-virtual">🎥 Virtual</span>
+          <!-- Cambia a tag-presencial para presencial -->
+        </div>
+        <!-- RECORDATORIO BOX -->
+        <div class="reminder-box">
+          <strong>⚠️ Recordatorio antes de entrar</strong>
+          <ul>
+            <li>Preparar deck / propuesta actualizada</li>
+            <li>Tener contrato / SOW a mano</li>
+            <li>Activar grabación (con permiso del cliente)</li>
+            <li>Conexión estable + cámara encendida</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ASISTENTES -->
+    <div style="margin-bottom:16px;">
+      <div class="section-title">Asistentes a la reunión</div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+        <!-- KAMs Neo -->
+        <span style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--neo-gray); margin-right:4px;">Neo:</span>
+        <div class="asistente-chip">[KAM Nombre] <span>· Account Manager</span></div>
+        <div class="asistente-chip">[Nombre] <span>· Director / CTO</span></div>
+        <!-- Asistentes cliente -->
+        <span style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--neo-gray); margin-left:8px; margin-right:4px;">Cliente:</span>
+        <div class="asistente-chip">[Nombre] <span>· [Cargo]</span></div>
+        <div class="asistente-chip">[Nombre] <span>· [Cargo]</span></div>
+      </div>
+    </div>
+
+    <!-- META ROW -->
+    <div class="meta-grid">
+      <div class="meta-item">
+        <label>Objetivo de la reunión</label>
+        <div class="meta-value small">[Tipo: presentación de propuesta / seguimiento / renovación]</div>
+      </div>
+      <div class="meta-item">
+        <label>KAM responsable</label>
+        <div class="meta-value">[Nombre del KAM]</div>
+      </div>
+      <div class="meta-item">
+        <label>Tiempo estimado</label>
+        <div class="meta-value">[45 min / 1 hora]</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       BLOQUE 2 — RESUMEN EJECUTIVO
+  ═══════════════════════════════════════════ -->
+  <div class="card card-accent">
+    <div class="section-title">Resumen Ejecutivo</div>
+    <p class="resumen-text">
+      [Máximo 3 líneas. Describe brevemente quién es el cliente, qué propuesta se lleva a la reunión y cuál es el objetivo estratégico de este encuentro. Ejemplo: Empresa líder en retail financiero con 5 años como cliente de Neo. Se presenta propuesta de automatización de agentes IA para reducir carga operativa en 40%. El objetivo es cerrar el proyecto antes del Q2.]
+    </p>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       BLOQUE 3 — CONTEXTO DEL CLIENTE
+  ═══════════════════════════════════════════ -->
+  <div class="card">
+    <div class="section-title">Contexto de la Empresa</div>
+
+    <!-- FILA 1: Industria · NPS · Empleados -->
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px;">
+      <div class="data-item">
+        <label>Industria</label>
+        <div class="val">[Industria / Sector]</div>
+      </div>
+      <div class="data-item">
+        <label>NPS Score Promedio</label>
+        <div style="display:flex;align-items:baseline;gap:5px;">
+          <span style="font-size:20px;font-weight:900;color:var(--neo-blue);">[X.X]</span>
+          <span style="font-size:11px;color:var(--neo-gray);">/ 10</span>
+        </div>
+      </div>
+      <div class="data-item">
+        <label>N° de Empleados</label>
+        <div class="val">[Rango de empleados]</div>
+      </div>
+    </div>
+
+    <!-- FILA 2: Importancia del cliente -->
+    <div class="data-item" style="margin-bottom:10px;">
+      <label>Importancia del Cliente</label>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;">
+        <div style="display:flex;align-items:center;gap:12px;background:var(--neo-bg);border:1px solid var(--neo-light-lavender);border-radius:8px;padding:10px 14px;">
+          <div style="background:var(--neo-navy);color:white;border-radius:6px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:900;letter-spacing:.03em;text-align:center;line-height:1.25;flex-shrink:0;">YoY<br>RANK</div>
+          <div>
+            <div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--neo-gray);margin-bottom:2px;">Ranking en Cartera (Ventas)</div>
+            <div style="display:flex;align-items:baseline;gap:8px;">
+              <span style="font-size:18px;font-weight:900;color:var(--neo-navy);">#[N°]</span>
+              <span style="font-size:11px;font-weight:700;color:var(--neo-blue);">[+X%] vs año anterior</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:var(--neo-bg);border:1px solid var(--neo-light-lavender);border-radius:8px;padding:10px 14px;">
+          <div style="background:var(--neo-blue);color:white;border-radius:6px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;flex-shrink:0;">A</div>
+          <div>
+            <div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--neo-gray);margin-bottom:4px;">Calidad Empresarial</div>
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+              <span style="background:var(--neo-blue);color:white;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px;letter-spacing:.06em;">TIER [A / B / C]</span>
+              <span style="font-size:11px;color:var(--neo-gray);">[Marca consolidada / Startup / PYME]</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILA 3: Propuestas en curso y por renovar -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <div class="data-item">
+        <label>Propuestas en Curso</label>
+        <div class="val body">[Nombre propuesta 1]<br>[Nombre propuesta 2]</div>
+      </div>
+      <div class="data-item">
+        <label>Propuestas por Renovar</label>
+        <div class="val body">[Nombre] — vence [fecha]</div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       BLOQUE 4 — INDICADORES DE SALUD (SEMÁFORO)
+  ═══════════════════════════════════════════ -->
+  <div class="grid-3">
+
+    <!-- NPS -->
+    <div class="card" style="padding:18px 20px;">
+      <div class="section-title">NPS</div>
+      <div class="kpi-row status-green">
+        <span class="kpi-label">Score actual</span>
+        <span class="kpi-val badge-green">8.5</span>
+      </div>
+      <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+        <span style="background:#fed7d7;color:var(--red);padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;">🔴 &lt; 6</span>
+        <span style="background:#fefcbf;color:var(--yellow);padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;">🟡 6 – 8</span>
+        <span style="background:#c6f6d5;color:var(--green);padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;">🟢 &gt; 8</span>
+      </div>
+    </div>
+
+    <!-- CONTACTOS ACTIVOS -->
+    <div class="card" style="padding:18px 20px;">
+      <div class="section-title">Contactos Activos</div>
+      <div class="kpi-row status-yellow">
+        <span class="kpi-label">Contactos</span>
+        <span class="kpi-val badge-yellow">3</span>
+      </div>
+      <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+        <span style="background:#fed7d7;color:var(--red);padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;">🔴 ≤ 2</span>
+        <span style="background:#fefcbf;color:var(--yellow);padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;">🟡 3 – 4</span>
+        <span style="background:#c6f6d5;color:var(--green);padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;">🟢 &gt; 4</span>
+      </div>
+    </div>
+
+    <!-- PROYECTOS ACTIVOS -->
+    <div class="card" style="padding:18px 20px;">
+      <div class="section-title">Proyectos Activos</div>
+      <div class="kpi-row status-red">
+        <span class="kpi-label">Proyectos</span>
+        <span class="kpi-val badge-red">1</span>
+      </div>
+      <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+        <span style="background:#fed7d7;color:var(--red);padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;">🔴 &lt; 1</span>
+        <span style="background:#fefcbf;color:var(--yellow);padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;">🟡 1 – 3</span>
+        <span style="background:#c6f6d5;color:var(--green);padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;">🟢 &gt; 3</span>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       BLOQUE 5 — PROPUESTAS ACTIVAS Y POR RENOVAR
+  ═══════════════════════════════════════════ -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="section-title">Propuestas Activas</div>
+      <div class="propuesta-row">
+        <div class="propuesta-name">Agente de Consulta IA</div>
+        <div class="propuesta-meta">Inicio: 03/2025 · S/ 45,000</div>
+        <span class="propuesta-badge badge-activa">Activa</span>
+      </div>
+      <div class="propuesta-row">
+        <div class="propuesta-name">Dashboard Analytics</div>
+        <div class="propuesta-meta">Inicio: 01/2025 · S/ 28,000</div>
+        <span class="propuesta-badge badge-activa">Activa</span>
+      </div>
+      <div class="propuesta-row" style="opacity:.45;">
+        <div class="propuesta-name" style="color:var(--neo-gray); font-weight:400; font-style:italic;">+ Agrega propuestas activas...</div>
+        <div class="propuesta-meta"></div>
+        <span></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Propuestas por Renovar</div>
+      <div class="propuesta-row">
+        <div class="propuesta-name">Soporte & Mantenimiento</div>
+        <div class="propuesta-meta">Vence: 30/05/2025 · S/ 12,000</div>
+        <span class="propuesta-badge badge-renovar">Por renovar</span>
+      </div>
+      <div class="propuesta-row">
+        <div class="propuesta-name">Licencias Power BI</div>
+        <div class="propuesta-meta">Vence: 15/06/2025 · S/ 8,500</div>
+        <span class="propuesta-badge badge-renovar">Por renovar</span>
+      </div>
+      <div class="propuesta-row" style="opacity:.45;">
+        <div class="propuesta-name" style="color:var(--neo-gray); font-weight:400; font-style:italic;">+ Agrega propuestas por renovar...</div>
+        <div class="propuesta-meta"></div>
+        <span></span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       BLOQUE 6 — CONTACTOS CLAVE
+  ═══════════════════════════════════════════ -->
+  <div class="card">
+    <div class="section-title">Contactos Clave del Cliente</div>
+    <div class="grid-2">
+      <div>
+        <div class="contact-card">
+          <div class="contact-avatar">AB</div>
+          <div class="contact-info">
+            <strong>[Nombre Apellido]</strong>
+            <small>[Cargo] · [Email]</small>
+            <div class="contact-tags">
+              <span class="ctag decision">Decisor</span>
+              <span class="ctag" style="background:#eef0fc;color:var(--neo-blue);">Reunión presente</span>
+            </div>
+          </div>
+        </div>
+        <div class="contact-card">
+          <div class="contact-avatar">CD</div>
+          <div class="contact-info">
+            <strong>[Nombre Apellido]</strong>
+            <small>[Cargo] · [Email]</small>
+            <div class="contact-tags">
+              <span class="ctag influencer">Influenciador</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="contact-card">
+          <div class="contact-avatar">EF</div>
+          <div class="contact-info">
+            <strong>[Nombre Apellido]</strong>
+            <small>[Cargo] · [Email]</small>
+            <div class="contact-tags">
+              <span class="ctag usuario">Usuario final</span>
+            </div>
+          </div>
+        </div>
+        <div class="contact-card" style="border:1.5px dashed var(--neo-light-lavender); background:transparent; opacity:.5;">
+          <div class="contact-avatar" style="background:var(--neo-light-lavender); color:var(--neo-gray);">+</div>
+          <div class="contact-info">
+            <strong style="color:var(--neo-gray); font-weight:400; font-style:italic;">Agregar contacto...</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       BLOQUE 7 — PREGUNTAS CLAVE DE LA REUNIÓN
+  ═══════════════════════════════════════════ -->
+  <div class="card">
+    <div class="section-title">Preguntas Clave para la Reunión</div>
+
+    <div class="pregunta-item">
+      <div class="pregunta-num">1</div>
+      <div class="pregunta-content">
+        <span class="pregunta-tag ptag-contractual">Contractual</span>
+        <strong>¿Están alineados los plazos y condiciones del contrato / SOW?</strong>
+        <p>Verificar fechas de inicio, entregables, SLAs y cláusulas de renovación o salida.</p>
+      </div>
+    </div>
+
+    <div class="pregunta-item">
+      <div class="pregunta-num">2</div>
+      <div class="pregunta-content">
+        <span class="pregunta-tag ptag-claridad">Claridad</span>
+        <strong>¿Tienen claridad sobre el alcance técnico y los entregables propuestos?</strong>
+        <p>Resolver dudas sobre metodología, herramientas, integraciones o dependencias del lado cliente.</p>
+      </div>
+    </div>
+
+    <div class="pregunta-item">
+      <div class="pregunta-num">3</div>
+      <div class="pregunta-content">
+        <span class="pregunta-tag ptag-estrategia">Estrategia</span>
+        <strong>¿Esta propuesta responde al objetivo de negocio principal del cliente este año?</strong>
+        <p>Confirmar alineación con sus OKRs, iniciativas del board o presupuesto disponible.</p>
+      </div>
+    </div>
+
+    <div class="pregunta-item">
+      <div class="pregunta-num">4</div>
+      <div class="pregunta-content">
+        <span class="pregunta-tag ptag-relacion">Relación</span>
+        <strong>¿Hay algún tema pendiente o fricción del proyecto anterior que debamos atender primero?</strong>
+        <p>Gestión de expectativas, feedback no expresado, satisfacción del equipo usuario.</p>
+      </div>
+    </div>
+
+    <div class="pregunta-item">
+      <div class="pregunta-num">5</div>
+      <div class="pregunta-content">
+        <span class="pregunta-tag ptag-contractual">Contractual</span>
+        <strong>¿Quiénes son los aprobadores finales y cuál es el proceso de aprobación interna?</strong>
+        <p>Identificar si hay comité de compras, legal, finanzas o sponsor ejecutivo que deba validar.</p>
+      </div>
+    </div>
+
+    <div class="pregunta-item">
+      <div class="pregunta-num">6</div>
+      <div class="pregunta-content">
+        <span class="pregunta-tag ptag-claridad">Claridad</span>
+        <strong>[Pregunta específica de la propuesta que llevas] — personalizar aquí</strong>
+        <p>[Detalle o contexto que el KAM debe indagar según la propuesta concreta de esta reunión.]</p>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       BLOQUE 8 — NOTAS PRE-REUNIÓN
+  ═══════════════════════════════════════════ -->
+  <div class="card">
+    <div class="section-title">Notas & Contexto Adicional del KAM</div>
+    <div class="notes-area">
+      Escribe aquí cualquier información relevante que no encaja en las secciones anteriores: historias del cliente, conversaciones informales, señales de compra o riesgo, estado emocional de la relación, etc.
+    </div>
+  </div>
+
+
+  <!-- FOOTER -->
+  <div class="brief-footer">
+    <span>Brief generado para uso interno · No compartir con el cliente</span>
+    <span class="neo-small">NEO CONSULTING · AI BRIEF v1.0</span>
+  </div>
+
+</div><!-- /brief-wrapper -->
+</body>
+</html>
