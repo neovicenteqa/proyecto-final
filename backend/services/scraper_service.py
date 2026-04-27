@@ -184,22 +184,31 @@ def get_company_brief(company: str) -> dict:
     """
     print(f"[scraper] Iniciando búsqueda: {company}")
 
-    # Búsquedas paralelas
-    general = _ddg_search(f"{company} empresa quiénes somos historia", max_results=6)
-    news    = _ddg_news(company, max_results=5)
+    # Búsqueda general + búsqueda específica de página "quiénes somos"
+    general  = _ddg_search(f"{company} empresa quiénes somos historia", max_results=6)
+    about    = _ddg_search(f"{company} quiénes somos nosotros historia fundación", max_results=4)
+    news     = _ddg_news(company, max_results=5)
 
-    # Scrapeo del mejor resultado disponible
-    scraped_text, website_url = _scrape_best(general)
+    # Snippets de DuckDuckGo — texto curado, ideal para el resumen
+    general_snippets = " ".join(r.get("body", "") for r in general[:5] if r.get("body"))
+    about_snippets   = " ".join(r.get("body", "") for r in about[:4]   if r.get("body"))
+    search_snippets  = f"{about_snippets} {general_snippets}".strip()
 
-    # Texto combinado para análisis
-    search_snippets = " ".join(r.get("body", "") for r in general[:4])
+    # Intentar scrapear una página "about" específica primero, luego resultados generales
+    about_text, about_url = _scrape_best(about)
+    scraped_text, website_url = (about_text, about_url) if _is_useful(about_text) else _scrape_best(general)
+    if not website_url:
+        website_url = about_url
+
+    # Texto combinado para detectar industria y empleados
     full_text = f"{scraped_text} {search_snippets}"
 
     industry  = _detect_industry(full_text)
     employees = _extract_employees(full_text)
 
-    # Resumen: preferir texto scrapeado, fallback a snippets de búsqueda
-    summary_source = scraped_text if len(scraped_text) > 200 else search_snippets
+    # Resumen: preferir snippets de búsqueda (describen la empresa), usar scrapeado como complemento
+    # Los snippets de DDG son más concisos y descriptivos que el HTML de la home
+    summary_source = search_snippets if len(search_snippets) > 150 else scraped_text
     summary = _clean_summary(summary_source, company)
 
     # Noticias
