@@ -16,7 +16,6 @@ HEADERS = {
 }
 TIMEOUT = 8
 
-# Dominios que suelen bloquear scraping — los saltamos
 BLOCKED_DOMAINS = [
     "datosperu.org", "linkedin.com", "facebook.com",
     "instagram.com", "twitter.com", "x.com",
@@ -25,7 +24,27 @@ BLOCKED_DOMAINS = [
     "monografias.com", "gestiopolis.com", "buenastareas.com",
     "youtube.com", "youtu.be", "tiktok.com",
     "wikipedia.org",
+    # Comparadores / agregadores
+    "comparaenvios.com", "comparabien.com", "rankia.pe", "rankia.com",
+    "cuida-tu-dinero.com", "banktrack.com", "helpmycash.com",
+    "remitly.com", "wise.com", "sendwave.com",
+    "empresite.eleconomista", "infocif.es", "einforma.com",
+    "dnb.com", "manta.com", "zoominfo.com", "crunchbase.com",
 ]
+
+_JUNK_SNIPPET = re.compile(
+    r"(▷|【|】|★|☆|✓|Log In|Sign Up|Sign In|Cookie|Privacy Policy"
+    r"|Terms of Service|Newsletter|Download PDF|keyboard_arrow"
+    r"|©|Compara Comisiones|Mejores Tarifas|Envíos de Dinero)",
+    re.IGNORECASE,
+)
+
+_JUNK_SENTENCE = re.compile(
+    r"(cookie|privacy|terms|copyright|all rights reserved|log in|sign up"
+    r"|newsletter|suscri|download|keyboard_arrow|©|\bjavascript\b|\bcss\b"
+    r"|▷|【|】|Compara|Mejores Tarifas)",
+    re.IGNORECASE,
+)
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -52,8 +71,23 @@ def _is_blocked(url: str) -> bool:
     return any(d in url for d in BLOCKED_DOMAINS)
 
 
-def _scrape_page(url: str, max_chars: int = 4000) -> str:
-    """Extrae texto limpio de una URL."""
+def _good_snippets(results: list) -> str:
+    """Snippets solo de dominios no bloqueados y sin texto basura."""
+    parts = []
+    for r in results:
+        url  = r.get("href", "")
+        body = r.get("body", "").strip()
+        if not body or not url:
+            continue
+        if _is_blocked(url):
+            continue
+        if _JUNK_SNIPPET.search(body):
+            continue
+        parts.append(body)
+    return " ".join(parts)
+
+
+def _scrape_page(url: str, max_chars: int = 5000) -> str:
     if _is_blocked(url):
         return ""
     try:
@@ -62,7 +96,12 @@ def _scrape_page(url: str, max_chars: int = 4000) -> str:
         soup = BeautifulSoup(resp.text, "lxml")
         for tag in soup(["script", "style", "nav", "footer", "header", "aside", "form"]):
             tag.decompose()
-        text = soup.get_text(separator=" ", strip=True)
+        # Preferir párrafos de contenido
+        paragraphs = soup.find_all("p")
+        if paragraphs:
+            text = " ".join(p.get_text(strip=True) for p in paragraphs if len(p.get_text(strip=True)) > 40)
+        else:
+            text = soup.get_text(separator=" ", strip=True)
         text = re.sub(r"\s+", " ", text)
         return text[:max_chars]
     except Exception as e:
@@ -70,45 +109,12 @@ def _scrape_page(url: str, max_chars: int = 4000) -> str:
         return ""
 
 
-_NOISE_PATTERNS = re.compile(
-    r"(Log In|Sign Up|Sign In|Cookie|Privacy Policy|Terms of Service"
-    r"|Subscribe|Newsletter|Download PDF|Download Free|keyboard_arrow"
-    r"|visibility \d+|description \d+)",
-    re.IGNORECASE,
-)
-
-
-def _is_useful(text: str) -> bool:
-    if len(text) < 200:
-        return False
-    noise_hits = len(_NOISE_PATTERNS.findall(text[:500]))
-    return noise_hits < 3
-
-
 def _scrape_best(results: list) -> tuple[str, str]:
-    """
-    Prioriza URLs que parezcan el sitio oficial (sin subdirectorios largos),
-    descarta sitios de documentos/redes sociales y verifica que el texto sea útil.
-    """
-    def _priority(url: str) -> int:
-        path = url.split("/", 3)[-1] if url.count("/") >= 3 else ""
-        # URLs cortas = más probable que sea la home del sitio oficial
-        if len(path) < 20:
-            return 0
-        if len(path) < 60:
-            return 1
-        return 2
-
-    candidates = [
-        r for r in results
-        if r.get("href") and not _is_blocked(r.get("href", ""))
-    ]
-    candidates.sort(key=lambda r: _priority(r.get("href", "")))
-
+    candidates = [r for r in results if r.get("href") and not _is_blocked(r.get("href", ""))]
     for r in candidates:
         url = r.get("href", "")
         text = _scrape_page(url)
-        if _is_useful(text):
+        if len(text) > 200 and not _JUNK_SNIPPET.search(text[:300]):
             return text, url
     return "", ""
 
@@ -134,9 +140,7 @@ def _detect_industry(text: str) -> str:
         score = sum(1 for t in terms if t in text_lower)
         if score > 0:
             scores[industry] = score
-    if scores:
-        return max(scores, key=scores.get)
-    return "Servicios Empresariales"
+    return max(scores, key=scores.get) if scores else "Servicios Empresariales"
 
 
 def _extract_employees(text: str) -> str:
@@ -149,24 +153,20 @@ def _extract_employees(text: str) -> str:
         m = re.search(pat, text, re.IGNORECASE)
         if m:
             num = m.group(1).replace(",", "").replace(".", "")
-            return f"{int(num):,}+"
+            try:
+                return f"{int(num):,}+"
+            except ValueError:
+                continue
     return "—"
 
 
-_JUNK_SENTENCE = re.compile(
-    r"(cookie|privacy|terms|copyright|all rights reserved|log in|sign up"
-    r"|newsletter|suscri|download|keyboard_arrow|visibility \d|description \d"
-    r"|©|\bjavascript\b|\bcss\b)",
-    re.IGNORECASE,
-)
-
-
 def _clean_summary(text: str, company: str, max_sentences: int = 4) -> str:
-    sentences = re.split(r"(?<=[.!?])\s+", text.strip())
+    # Dividir en oraciones (punto, signo de exclamación/interrogación, o elipsis)
+    sentences = re.split(r"(?<=[.!?])\s+|(?<=\.\.\.)\s+", text.strip())
     clean = [
         s.strip() for s in sentences
-        if len(s) > 50
-        and not re.search(r"[<>{}\[\]\\|]", s)
+        if len(s) > 40
+        and not re.search(r"[<>{}\[\]\\|▷【】]", s)
         and not s.strip().startswith("http")
         and not _JUNK_SENTENCE.search(s)
     ]
@@ -178,46 +178,40 @@ def _clean_summary(text: str, company: str, max_sentences: int = 4) -> str:
 # ── Builder principal ──────────────────────────────────────────────────────
 
 def get_company_brief(company: str) -> dict:
-    """
-    Construye un brief a partir de información pública scrapeada.
-    Fallback automático si alguna fuente falla.
-    """
     print(f"[scraper] Iniciando búsqueda: {company}")
 
-    # Búsqueda general + búsqueda específica de página "quiénes somos"
-    general  = _ddg_search(f"{company} empresa quiénes somos historia", max_results=6)
-    about    = _ddg_search(f"{company} quiénes somos nosotros historia fundación", max_results=4)
-    news     = _ddg_news(company, max_results=5)
+    general = _ddg_search(f"{company} empresa historia quiénes somos", max_results=8)
+    news    = _ddg_news(company, max_results=5)
 
-    # Snippets de DuckDuckGo — texto curado, ideal para el resumen
-    general_snippets = " ".join(r.get("body", "") for r in general[:5] if r.get("body"))
-    about_snippets   = " ".join(r.get("body", "") for r in about[:4]   if r.get("body"))
-    search_snippets  = f"{about_snippets} {general_snippets}".strip()
+    # Snippets filtrados (sin dominios basura, sin texto con símbolos raros)
+    snippets = _good_snippets(general)
 
-    # Intentar scrapear una página "about" específica primero, luego resultados generales
-    about_text, about_url = _scrape_best(about)
-    scraped_text, website_url = (about_text, about_url) if _is_useful(about_text) else _scrape_best(general)
+    # Scrapear solo si los snippets no son suficientes
+    scraped_text, website_url = "", ""
+    if len(snippets) < 300:
+        scraped_text, website_url = _scrape_best(general)
+
+    # Si no hay website_url del scraping, tomar el primer dominio no bloqueado
     if not website_url:
-        website_url = about_url
+        for r in general:
+            href = r.get("href", "")
+            if href and not _is_blocked(href):
+                website_url = href
+                break
 
-    # Texto combinado para detectar industria y empleados
-    full_text = f"{scraped_text} {search_snippets}"
-
+    full_text = f"{snippets} {scraped_text}"
     industry  = _detect_industry(full_text)
     employees = _extract_employees(full_text)
 
-    # Resumen: preferir snippets de búsqueda (describen la empresa), usar scrapeado como complemento
-    # Los snippets de DDG son más concisos y descriptivos que el HTML de la home
-    summary_source = search_snippets if len(search_snippets) > 150 else scraped_text
+    # Resumen desde snippets filtrados
+    summary_source = snippets if len(snippets) > 100 else scraped_text
     summary = _clean_summary(summary_source, company)
 
-    # Noticias
-    news_titles = [n.get("title", "") for n in news if n.get("title")]
+    news_titles  = [n.get("title", "") for n in news if n.get("title")]
     news_context = " | ".join(news_titles[:3]) if news_titles else "Sin noticias recientes detectadas."
+    sources      = [r.get("href", "") for r in general[:4] if r.get("href") and not _is_blocked(r.get("href", ""))]
 
-    sources = [r.get("href", "") for r in general[:3] if r.get("href") and not _is_blocked(r.get("href", ""))]
-
-    print(f"[scraper] OK — Industria: {industry} | Empleados: {employees} | Noticias: {len(news_titles)}")
+    print(f"[scraper] OK — Industria: {industry} | Empleados: {employees} | Snippets: {len(snippets)} chars")
 
     return {
         "company": company,
@@ -255,11 +249,11 @@ def get_company_brief(company: str) -> dict:
             "sources": sources,
         },
         "key_questions": [
-            {"tag": "estrategia",  "question": f"¿Cuáles son los objetivos estratégicos de {company} para este año?",    "detail": "Alinear la propuesta de Neo con sus prioridades de negocio y OKRs."},
-            {"tag": "claridad",    "question": "¿Tienen claridad sobre el alcance técnico y entregables esperados?",      "detail": "Resolver dudas sobre metodología, herramientas e integraciones necesarias."},
-            {"tag": "contractual", "question": "¿Quiénes son los aprobadores finales y cuál es el proceso de compra?",   "detail": "Identificar si hay comité, legal o finanzas que deba validar la propuesta."},
-            {"tag": "relacion",    "question": "¿Han trabajado antes con proveedores de consultoría o tecnología?",       "detail": "Entender su experiencia previa para calibrar expectativas y metodología."},
-            {"tag": "estrategia",  "question": f"¿Cómo mide {company} el éxito de este tipo de iniciativa?",            "detail": "Definir métricas de éxito desde el inicio para gestionar expectativas."},
+            {"tag": "estrategia",  "question": f"¿Cuáles son los objetivos estratégicos de {company} para este año?",   "detail": "Alinear la propuesta de Neo con sus prioridades de negocio y OKRs."},
+            {"tag": "claridad",    "question": "¿Tienen claridad sobre el alcance técnico y entregables esperados?",     "detail": "Resolver dudas sobre metodología, herramientas e integraciones necesarias."},
+            {"tag": "contractual", "question": "¿Quiénes son los aprobadores finales y cuál es el proceso de compra?",  "detail": "Identificar si hay comité, legal o finanzas que deba validar la propuesta."},
+            {"tag": "relacion",    "question": "¿Han trabajado antes con proveedores de consultoría o tecnología?",      "detail": "Entender su experiencia previa para calibrar expectativas y metodología."},
+            {"tag": "estrategia",  "question": f"¿Cómo mide {company} el éxito de este tipo de iniciativa?",           "detail": "Definir métricas de éxito desde el inicio para gestionar expectativas."},
         ],
         "value_hypothesis": [
             f"Acelerar los objetivos de negocio de {company} con soluciones tecnológicas a medida.",
