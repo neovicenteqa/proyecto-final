@@ -26,16 +26,32 @@ class MeetingResponse(BaseModel):
     email_send_at: Optional[str] = None
 
 
+@router.get("/scraper/test")
+async def test_scraper(company: str = "Interbank"):
+    """Debug: prueba el scraper directamente y muestra el resultado o error."""
+    import traceback
+    try:
+        result = get_company_brief(company)
+        return {"status": "ok", "source": result.get("status"), "summary": result.get("executive_summary", "")[:300], "industry": result.get("client_context", {}).get("industry")}
+    except Exception as e:
+        return {"status": "error", "error": str(e), "traceback": traceback.format_exc()}
+
+
 @router.post("/meeting/trigger", response_model=MeetingResponse)
 async def trigger_meeting_prep(payload: MeetingRequest):
     """
     Genera el AI Brief y programa el envío del correo 24h antes de la reunión.
     """
+    scraper_error = None
     try:
         brief = get_company_brief(payload.company)
     except Exception as e:
-        print(f"[scraper] Falló scraping, usando mock: {e}")
+        scraper_error = str(e)
+        print(f"[scraper] Falló scraping ({type(e).__name__}: {e}), usando mock")
         brief = get_mock_brief(payload.company)
+
+    if scraper_error:
+        brief["alert"] = {"level": "warning", "message": f"Scraping falló: {scraper_error}", "score": 50}
 
     meeting_data = {
         "company": payload.company,
