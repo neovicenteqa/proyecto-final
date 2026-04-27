@@ -141,7 +141,11 @@ def _schedule_brief_for_event(event: dict, triggered_by: str):
         print(f"[calendar] No se pudo parsear fecha: {start_str}")
         return
 
-    brief = get_mock_brief(summary)
+    try:
+        from services.scraper_service import get_company_brief
+        brief = get_company_brief(summary)
+    except Exception:
+        brief = get_mock_brief(summary)
     meeting_data = {
         "company": summary,
         "participants": [

@@ -3,6 +3,7 @@ from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import datetime, timedelta
 
+from services.scraper_service import get_company_brief
 from services.mock_data import get_mock_brief
 from services.scheduler import scheduler
 from services.email_service import send_brief_email
@@ -30,7 +31,11 @@ async def trigger_meeting_prep(payload: MeetingRequest):
     """
     Genera el AI Brief y programa el envío del correo 24h antes de la reunión.
     """
-    brief = get_mock_brief(payload.company)
+    try:
+        brief = get_company_brief(payload.company)
+    except Exception as e:
+        print(f"[scraper] Falló scraping, usando mock: {e}")
+        brief = get_mock_brief(payload.company)
 
     meeting_data = {
         "company": payload.company,
