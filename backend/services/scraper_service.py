@@ -211,7 +211,32 @@ def get_company_brief(company: str) -> dict:
     news_context = " | ".join(news_titles[:3]) if news_titles else "Sin noticias recientes detectadas."
     sources      = [r.get("href", "") for r in general[:4] if r.get("href") and not _is_blocked(r.get("href", ""))]
 
-    print(f"[scraper] OK — Industria: {industry} | Empleados: {employees} | Snippets: {len(snippets)} chars")
+    # Enriquecer con LLM (Gemini) — fallback a valores scrapeados si falla
+    llm_data = None
+    try:
+        from services.llm_service import enrich_brief
+        llm_data = enrich_brief(company, snippets, news_titles, industry)
+    except Exception as e:
+        print(f"[llm] No disponible, usando datos scrapeados: {e}")
+
+    executive_summary = llm_data.get("executive_summary", summary)   if llm_data else summary
+    key_questions     = llm_data.get("key_questions",     [])        if llm_data else None
+    value_hypothesis  = llm_data.get("value_hypothesis",  [])        if llm_data else None
+
+    print(f"[scraper] OK — Industria: {industry} | Empleados: {employees} | LLM: {'sí' if llm_data else 'no'}")
+
+    default_questions = [
+        {"tag": "estrategia",  "question": f"¿Cuáles son los objetivos estratégicos de {company} para este año?",   "detail": "Alinear la propuesta de Neo con sus prioridades de negocio y OKRs."},
+        {"tag": "claridad",    "question": "¿Tienen claridad sobre el alcance técnico y entregables esperados?",     "detail": "Resolver dudas sobre metodología, herramientas e integraciones necesarias."},
+        {"tag": "contractual", "question": "¿Quiénes son los aprobadores finales y cuál es el proceso de compra?",  "detail": "Identificar si hay comité, legal o finanzas que deba validar la propuesta."},
+        {"tag": "relacion",    "question": "¿Han trabajado antes con proveedores de consultoría o tecnología?",      "detail": "Entender su experiencia previa para calibrar expectativas y metodología."},
+        {"tag": "estrategia",  "question": f"¿Cómo mide {company} el éxito de este tipo de iniciativa?",           "detail": "Definir métricas de éxito desde el inicio para gestionar expectativas."},
+    ]
+    default_hypothesis = [
+        f"Acelerar los objetivos de negocio de {company} con soluciones tecnológicas a medida.",
+        "Reducir costos operativos mediante automatización e inteligencia de datos.",
+        "Mejorar la toma de decisiones con analítica avanzada y visibilidad en tiempo real.",
+    ]
 
     return {
         "company": company,
@@ -225,7 +250,7 @@ def get_company_brief(company: str) -> dict:
             "message": f"Datos obtenidos de fuentes públicas. Noticias recientes: {news_context}",
             "score": 80,
         },
-        "executive_summary": summary,
+        "executive_summary": executive_summary,
         "client_context": {
             "industry": industry,
             "employees": employees,
@@ -248,18 +273,8 @@ def get_company_brief(company: str) -> dict:
             "website": website_url,
             "sources": sources,
         },
-        "key_questions": [
-            {"tag": "estrategia",  "question": f"¿Cuáles son los objetivos estratégicos de {company} para este año?",   "detail": "Alinear la propuesta de Neo con sus prioridades de negocio y OKRs."},
-            {"tag": "claridad",    "question": "¿Tienen claridad sobre el alcance técnico y entregables esperados?",     "detail": "Resolver dudas sobre metodología, herramientas e integraciones necesarias."},
-            {"tag": "contractual", "question": "¿Quiénes son los aprobadores finales y cuál es el proceso de compra?",  "detail": "Identificar si hay comité, legal o finanzas que deba validar la propuesta."},
-            {"tag": "relacion",    "question": "¿Han trabajado antes con proveedores de consultoría o tecnología?",      "detail": "Entender su experiencia previa para calibrar expectativas y metodología."},
-            {"tag": "estrategia",  "question": f"¿Cómo mide {company} el éxito de este tipo de iniciativa?",           "detail": "Definir métricas de éxito desde el inicio para gestionar expectativas."},
-        ],
-        "value_hypothesis": [
-            f"Acelerar los objetivos de negocio de {company} con soluciones tecnológicas a medida.",
-            "Reducir costos operativos mediante automatización e inteligencia de datos.",
-            "Mejorar la toma de decisiones con analítica avanzada y visibilidad en tiempo real.",
-        ],
+        "key_questions":  key_questions  or default_questions,
+        "value_hypothesis": value_hypothesis or default_hypothesis,
         "news": news_titles,
         "sources": sources,
     }
