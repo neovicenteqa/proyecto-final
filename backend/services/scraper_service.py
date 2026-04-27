@@ -20,6 +20,11 @@ TIMEOUT = 8
 BLOCKED_DOMAINS = [
     "datosperu.org", "linkedin.com", "facebook.com",
     "instagram.com", "twitter.com", "x.com",
+    "academia.edu", "scribd.com", "slideshare.net",
+    "researchgate.net", "issuu.com", "docsity.com",
+    "monografias.com", "gestiopolis.com", "buenastareas.com",
+    "youtube.com", "youtu.be", "tiktok.com",
+    "wikipedia.org",
 ]
 
 
@@ -65,17 +70,45 @@ def _scrape_page(url: str, max_chars: int = 4000) -> str:
         return ""
 
 
+_NOISE_PATTERNS = re.compile(
+    r"(Log In|Sign Up|Sign In|Cookie|Privacy Policy|Terms of Service"
+    r"|Subscribe|Newsletter|Download PDF|Download Free|keyboard_arrow"
+    r"|visibility \d+|description \d+)",
+    re.IGNORECASE,
+)
+
+
+def _is_useful(text: str) -> bool:
+    if len(text) < 200:
+        return False
+    noise_hits = len(_NOISE_PATTERNS.findall(text[:500]))
+    return noise_hits < 3
+
+
 def _scrape_best(results: list) -> tuple[str, str]:
     """
-    Intenta scrapear las URLs de los resultados en orden
-    y devuelve (texto, url) del primero que funcione.
+    Prioriza URLs que parezcan el sitio oficial (sin subdirectorios largos),
+    descarta sitios de documentos/redes sociales y verifica que el texto sea útil.
     """
-    for r in results:
+    def _priority(url: str) -> int:
+        path = url.split("/", 3)[-1] if url.count("/") >= 3 else ""
+        # URLs cortas = más probable que sea la home del sitio oficial
+        if len(path) < 20:
+            return 0
+        if len(path) < 60:
+            return 1
+        return 2
+
+    candidates = [
+        r for r in results
+        if r.get("href") and not _is_blocked(r.get("href", ""))
+    ]
+    candidates.sort(key=lambda r: _priority(r.get("href", "")))
+
+    for r in candidates:
         url = r.get("href", "")
-        if not url or _is_blocked(url):
-            continue
         text = _scrape_page(url)
-        if len(text) > 200:
+        if _is_useful(text):
             return text, url
     return "", ""
 
@@ -120,15 +153,22 @@ def _extract_employees(text: str) -> str:
     return "—"
 
 
+_JUNK_SENTENCE = re.compile(
+    r"(cookie|privacy|terms|copyright|all rights reserved|log in|sign up"
+    r"|newsletter|suscri|download|keyboard_arrow|visibility \d|description \d"
+    r"|©|\bjavascript\b|\bcss\b)",
+    re.IGNORECASE,
+)
+
+
 def _clean_summary(text: str, company: str, max_sentences: int = 4) -> str:
-    """Extrae un resumen limpio y coherente del texto scrapeado."""
-    # Separar en oraciones
     sentences = re.split(r"(?<=[.!?])\s+", text.strip())
-    # Filtrar oraciones demasiado cortas o con caracteres extraños
     clean = [
         s.strip() for s in sentences
-        if len(s) > 40 and not re.search(r"[<>{}\[\]\\|]", s)
+        if len(s) > 50
+        and not re.search(r"[<>{}\[\]\\|]", s)
         and not s.strip().startswith("http")
+        and not _JUNK_SENTENCE.search(s)
     ]
     if not clean:
         return f"{company} es una empresa con presencia en el mercado. Información disponible en fuentes públicas."
