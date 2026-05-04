@@ -157,8 +157,14 @@ def _schedule_brief_for_event(event: dict, triggered_by: str):
     send_at = start_dt_local - timedelta(hours=24)
     now = datetime.now()
 
+    # Mínimo 5 minutos de delay para que webhooks duplicados (uno por cada
+    # asistente que acepta) reemplacen el mismo job pendiente antes de que corra.
+    MIN_DELAY = timedelta(minutes=5)
     for email in recipients:
-        run_at = send_at if send_at > now else now + timedelta(seconds=10)
+        if send_at > now:
+            run_at = send_at
+        else:
+            run_at = now + MIN_DELAY
 
         scheduler.add_job(
             send_brief_email,
